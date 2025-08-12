@@ -1,0 +1,1633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Liquid Calculator Pro</title>
+    
+    <meta name="description" content="Enterprise-grade e-liquid mixing calculator for professional vaping and DIY enthusiasts">
+    <meta name="keywords" content="e-liquid, calculator, vaping, DIY, mixing, nicotine, VG, PG, professional">
+    <meta name="theme-color" content="#1e293b">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="E-Liquid Calculator Pro">
+    <meta name="msapplication-TileColor" content="#1e293b">
+    
+    <link rel="manifest" id="manifest-placeholder">
+    <link rel="icon" type="image/svg+xml" id="favicon-placeholder">
+    
+    <style>
+        :root {
+            --primary-dark: #1e293b;
+            --primary-medium: #334155;
+            --primary-light: #475569;
+            --secondary-dark: #0f172a;
+            --accent-blue: #3b82f6;
+            --accent-green: #10b981;
+            --accent-orange: #f59e0b;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --text-inverse: #ffffff;
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-accent: rgba(255, 255, 255, 0.95);
+            --border-color: #e2e8f0;
+            --border-accent: rgba(30, 41, 59, 0.1);
+            --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 10px 25px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.15);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', system-ui, sans-serif;
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            color: var(--text-primary);
+            line-height: 1.6;
+            font-weight: 400;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: var(--bg-accent);
+            backdrop-filter: blur(20px);
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-accent);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-medium) 50%, var(--primary-light) 100%);
+            color: var(--text-inverse);
+            padding: 48px 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><defs><pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="1"/></pattern></defs><rect width="100%" height="100%" fill="url(%23grid)"/></svg>');
+            pointer-events: none;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .header h1 {
+            font-size: clamp(2.5rem, 5vw, 3.5rem);
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-subtitle {
+            font-size: clamp(1.1rem, 2.5vw, 1.3rem);
+            font-weight: 500;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+
+        .header-badge {
+            display: inline-block;
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--accent-green);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 20px;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .content {
+            padding: 48px 40px;
+        }
+
+        .mode-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 8px;
+            margin-bottom: 48px;
+            gap: 8px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .mode-btn {
+            background: transparent;
+            border: none;
+            padding: 20px 24px;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: var(--text-secondary);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-medium) 100%);
+            color: var(--text-inverse);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .mode-btn:hover:not(.active) {
+            background: var(--bg-primary);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .mode-icon {
+            font-size: 1.2rem;
+        }
+
+        .section {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 40px;
+            margin-bottom: 32px;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
+        }
+
+        .section:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .section-title {
+            font-size: 1.75rem;
+            color: var(--text-primary);
+            margin-bottom: 32px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .section-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-medium) 100%);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-inverse);
+            font-size: 1.5rem;
+            flex-shrink: 0;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 32px;
+            margin-bottom: 40px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .input-label {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .input-label-icon {
+            font-size: 1.1rem;
+            opacity: 0.7;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 18px 20px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary-dark);
+            box-shadow: 0 0 0 4px rgba(30, 41, 59, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .select-field {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231e293b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 18px center;
+            background-size: 18px;
+            padding-right: 50px;
+            cursor: pointer;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-medium) 100%);
+            color: var(--text-inverse);
+            border: none;
+            padding: 18px 36px;
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            min-width: 180px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover:before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--accent-green) 0%, #059669 100%);
+        }
+
+        .btn-tertiary {
+            background: linear-gradient(135deg, var(--accent-orange) 0%, #d97706 100%);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        }
+
+        .results-section {
+            margin-top: 40px;
+            display: none;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .result-card {
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 32px 24px;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-dark), var(--accent-blue), var(--accent-green), var(--primary-dark));
+            background-size: 200% 100%;
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        .result-card:hover {
+            border-color: var(--primary-dark);
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .result-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary-dark);
+            margin-bottom: 12px;
+            display: block;
+            line-height: 1;
+        }
+
+        .result-label {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+        }
+
+        .recipe-display {
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 36px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .recipe-display::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, var(--primary-dark), var(--accent-blue), var(--accent-green), var(--accent-orange), var(--primary-dark));
+            background-size: 200% 100%;
+            animation: shimmer 4s infinite;
+        }
+
+        .recipe-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .copy-btn {
+            background: linear-gradient(135deg, var(--accent-green) 0%, #059669 100%);
+            color: var(--text-inverse);
+            border: none;
+            padding: 12px 24px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .copy-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .copy-btn.copied {
+            background: linear-gradient(135deg, var(--accent-blue) 0%, #2563eb 100%);
+        }
+
+        .recipe-list {
+            display: grid;
+            gap: 16px;
+        }
+
+        .recipe-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+            border-left: 6px solid var(--primary-dark);
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .recipe-item:hover {
+            background: var(--bg-primary);
+            transform: translateX(8px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .ingredient-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 1.05rem;
+        }
+
+        .ingredient-amount {
+            font-weight: 700;
+            color: var(--primary-dark);
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+            font-size: 1.1rem;
+        }
+
+        .saved-recipes {
+            margin-top: 40px;
+        }
+
+        .recipe-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 28px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .recipe-card:hover {
+            background: var(--bg-primary);
+            border-color: var(--primary-dark);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .recipe-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+        }
+
+        .recipe-info {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+
+        .recipe-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn-small {
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            min-width: 120px;
+            border-radius: var(--radius-sm);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .tips-section {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(5, 150, 105, 0.08) 100%);
+            border: 2px solid rgba(16, 185, 129, 0.2);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            margin-top: 40px;
+        }
+
+        .tips-title {
+            color: var(--accent-green);
+            margin-bottom: 20px;
+            font-size: 1.25rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .tips-list {
+            list-style: none;
+            font-size: 1rem;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .tips-list li {
+            margin-bottom: 12px;
+            padding-left: 32px;
+            position: relative;
+        }
+
+        .tips-list li:before {
+            content: "⚡";
+            position: absolute;
+            left: 0;
+            color: var(--accent-green);
+            font-size: 1.2rem;
+        }
+
+        .offline-indicator {
+            background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+            color: var(--text-inverse);
+            padding: 16px;
+            text-align: center;
+            font-size: 1rem;
+            font-weight: 600;
+            display: none;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: var(--shadow-md);
+        }
+
+        .footer {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-medium) 50%, var(--primary-light) 100%);
+            color: #94a3b8;
+            text-align: center;
+            padding: 40px;
+            border-top: 1px solid var(--primary-medium);
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .footer-brand {
+            color: var(--text-inverse);
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .footer-description {
+            margin: 12px 0;
+            opacity: 0.8;
+            font-size: 1rem;
+        }
+
+        .pwa-status {
+            background: linear-gradient(135deg, var(--accent-green) 0%, #059669 100%);
+            color: var(--text-inverse);
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            margin-top: 16px;
+            display: inline-block;
+            font-weight: 600;
+            box-shadow: var(--shadow-sm);
+        }
+
+        #install-button {
+            animation: pulse 2s infinite;
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 1000;
+            border-radius: 50px;
+            padding: 16px 28px;
+            font-size: 0.95rem;
+            box-shadow: var(--shadow-lg);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .content {
+                padding: 40px 32px;
+            }
+            
+            .section {
+                padding: 32px;
+            }
+            
+            .input-grid {
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                gap: 24px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 40px 24px;
+            }
+            
+            .content {
+                padding: 32px 24px;
+            }
+            
+            .section {
+                padding: 28px 20px;
+            }
+            
+            .input-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+
+            .results-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 16px;
+            }
+
+            .recipe-title {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+
+            .copy-btn {
+                align-self: flex-start;
+            }
+
+            #install-button {
+                bottom: 20px;
+                right: 20px;
+                padding: 14px 24px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                padding: 32px 20px;
+            }
+            
+            .mode-selector {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            
+            .mode-btn {
+                padding: 16px 20px;
+            }
+
+            .footer {
+                padding: 32px 20px;
+            }
+
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section-title {
+                font-size: 1.5rem;
+            }
+
+            .section-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-indicator" id="offlineIndicator">
+        ⚠️ You're offline - App functionality limited
+    </div>
+    
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <h1>E-Liquid Calculator Pro</h1>
+                <p class="header-subtitle">Enterprise-grade mixing calculator for professional vaping and DIY enthusiasts</p>
+                <div class="header-badge">✓ Professional Grade Tool</div>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="mode-selector">
+                <button class="mode-btn active" id="calculatorMode" onclick="switchMode('calculator')">
+                    <span class="mode-icon">🧪</span>
+                    Recipe Calculator
+                </button>
+                <button class="mode-btn" id="converterMode" onclick="switchMode('converter')">
+                    <span class="mode-icon">🔄</span>
+                    Unit Converter
+                </button>
+                <button class="mode-btn" id="recipesMode" onclick="switchMode('recipes')">
+                    <span class="mode-icon">📚</span>
+                    Saved Recipes
+                </button>
+            </div>
+
+            <!-- Calculator Mode -->
+            <div id="calculatorSection">
+                <div class="section">
+                    <h2 class="section-title">
+                        <span class="section-icon">⚗️</span>
+                        Recipe Configuration
+                    </h2>
+                    
+                    <div class="input-grid">
+                        <div class="input-group">
+                            <label for="totalVolume" class="input-label">
+                                <span class="input-label-icon">🧪</span>
+                                Total Volume (ml)
+                            </label>
+                            <input type="number" id="totalVolume" class="input-field" value="100" min="1" max="10000" placeholder="100">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="targetNicotine" class="input-label">
+                                <span class="input-label-icon">🎯</span>
+                                Target Nicotine (mg/ml)
+                            </label>
+                            <input type="number" id="targetNicotine" class="input-field" value="3" min="0" max="50" step="0.5" placeholder="3">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="nicotineStrength" class="input-label">
+                                <span class="input-label-icon">💊</span>
+                                Nicotine Base Strength (mg/ml)
+                            </label>
+                            <select id="nicotineStrength" class="input-field select-field">
+                                <option value="100">100 mg/ml</option>
+                                <option value="72">72 mg/ml</option>
+                                <option value="48">48 mg/ml</option>
+                                <option value="36">36 mg/ml</option>
+                                <option value="24">24 mg/ml</option>
+                                <option value="18">18 mg/ml</option>
+                                <option value="12">12 mg/ml</option>
+                                <option value="6">6 mg/ml</option>
+                                <option value="3">3 mg/ml</option>
+                            </select>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="vgPgRatio" class="input-label">
+                                <span class="input-label-icon">🎨</span>
+                                VG/PG Ratio
+                            </label>
+                            <select id="vgPgRatio" class="input-field select-field">
+                                <option value="70/30">70/30 VG/PG</option>
+                                <option value="60/40">60/40 VG/PG</option>
+                                <option value="50/50">50/50 VG/PG</option>
+                                <option value="40/60">40/60 VG/PG</option>
+                                <option value="30/70">30/70 VG/PG</option>
+                                <option value="80/20">80/20 VG/PG</option>
+                                <option value="90/10">90/10 VG/PG</option>
+                            </select>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="flavorPercentage" class="input-label">
+                                <span class="input-label-icon">🍓</span>
+                                Total Flavor Percentage (%)
+                            </label>
+                            <input type="number" id="flavorPercentage" class="input-field" value="15" min="0" max="30" step="0.5" placeholder="15">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="recipeName" class="input-label">
+                                <span class="input-label-icon">📝</span>
+                                Recipe Name (Optional)
+                            </label>
+                            <input type="text" id="recipeName" class="input-field" placeholder="My Professional Recipe">
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="btn" onclick="calculateRecipe()">
+                            🧮 Calculate Recipe
+                        </button>
+                        <button class="btn btn-secondary" onclick="saveRecipe()" id="saveBtn" style="display: none;">
+                            💾 Save Recipe
+                        </button>
+                    </div>
+                    
+                    <div class="results-section" id="resultsSection">
+                        <div class="results-grid" id="resultsGrid">
+                        </div>
+                        
+                        <div class="recipe-display" id="recipeDisplay">
+                            <div class="recipe-title">
+                                <span id="recipeDisplayName">Your E-Liquid Recipe</span>
+                                <button class="copy-btn" onclick="copyRecipe()">
+                                    📋 Copy Recipe
+                                </button>
+                            </div>
+                            <div class="recipe-list" id="recipeList">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tips-section">
+                    <h3 class="tips-title">
+                        💡 Professional Mixing Guidelines
+                    </h3>
+                    <ul class="tips-list">
+                        <li><strong>Safety First:</strong> Always wear nitrile gloves and safety glasses when handling nicotine base</li>
+                        <li><strong>Precision Matters:</strong> Use a digital scale with 0.01g accuracy for professional results</li>
+                        <li><strong>Environment:</strong> Work in well-ventilated area away from children and pets</li>
+                        <li><strong>Storage:</strong> Keep all ingredients in cool, dark places with proper labeling</li>
+                        <li><strong>Steeping Process:</strong> Allow 1-2 weeks steeping time for optimal flavor development</li>
+                        <li><strong>Documentation:</strong> Always label bottles with recipe name, date, and nicotine strength</li>
+                        <li><strong>Quality Control:</strong> Start with lower flavor percentages and adjust to preference</li>
+                        <li><strong>Temperature:</strong> Mix at room temperature for best ingredient incorporation</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Converter Mode -->
+            <div id="converterSection" class="hidden">
+                <div class="section">
+                    <h2 class="section-title">
+                        <span class="section-icon">🔄</span>
+                        Professional Unit Converter
+                    </h2>
+                    
+                    <div class="input-grid">
+                        <div class="input-group">
+                            <label for="convertValue" class="input-label">
+                                <span class="input-label-icon">📏</span>
+                                Value to Convert
+                            </label>
+                            <input type="number" id="convertValue" class="input-field" placeholder="Enter value" step="0.001">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="fromUnit" class="input-label">
+                                <span class="input-label-icon">➡️</span>
+                                Convert From
+                            </label>
+                            <select id="fromUnit" class="input-field select-field">
+                                <option value="ml">Milliliters (ml)</option>
+                                <option value="g">Grams (g)</option>
+                                <option value="oz">Fluid Ounces (fl oz)</option>
+                                <option value="drops">Drops</option>
+                                <option value="tsp">Teaspoons (tsp)</option>
+                                <option value="tbsp">Tablespoons (tbsp)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="toUnit" class="input-label">
+                                <span class="input-label-icon">⬅️</span>
+                                Convert To
+                            </label>
+                            <select id="toUnit" class="input-field select-field">
+                                <option value="g">Grams (g)</option>
+                                <option value="ml">Milliliters (ml)</option>
+                                <option value="oz">Fluid Ounces (fl oz)</option>
+                                <option value="drops">Drops</option>
+                                <option value="tsp">Teaspoons (tsp)</option>
+                                <option value="tbsp">Tablespoons (tbsp)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="btn" onclick="convertUnits()">
+                            🔄 Convert Units
+                        </button>
+                        <button class="btn btn-tertiary" onclick="clearConverter()">
+                            🧹 Clear
+                        </button>
+                    </div>
+                    
+                    <div class="results-section" id="converterResults">
+                        <div class="result-card">
+                            <span class="result-value" id="conversionResult">0.000</span>
+                            <span class="result-label" id="conversionUnit">Result</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recipes Mode -->
+            <div id="recipesSection" class="hidden">
+                <div class="section">
+                    <h2 class="section-title">
+                        <span class="section-icon">📚</span>
+                        Recipe Library
+                    </h2>
+                    
+                    <div class="saved-recipes" id="savedRecipes">
+                        <p style="text-align: center; color: var(--text-secondary); font-style: italic; font-size: 1.1rem; padding: 40px;">
+                            No saved recipes yet. Create and save a recipe in the Calculator tab to build your professional library!
+                        </p>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="btn btn-secondary" onclick="exportAllRecipes()">
+                            📤 Export All Recipes
+                        </button>
+                        <button class="btn btn-danger" onclick="clearAllRecipes()">
+                            🗑️ Clear All Recipes
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <div class="footer-content">
+                <div class="footer-description">Professional E-Liquid Mixing Calculator</div>
+                Developed by <span class="footer-brand">NetIRC</span>
+                <div class="pwa-status" id="pwaStatus">
+                    ✓ PWA Ready - Install for offline professional use
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentMode = 'calculator';
+        let savedRecipes = JSON.parse(localStorage.getItem('eliquid-recipes-pro') || '[]');
+
+        // Mode switching
+        function switchMode(mode) {
+            currentMode = mode;
+            
+            // Update button states
+            document.getElementById('calculatorMode').classList.toggle('active', mode === 'calculator');
+            document.getElementById('converterMode').classList.toggle('active', mode === 'converter');
+            document.getElementById('recipesMode').classList.toggle('active', mode === 'recipes');
+            
+            // Show/hide sections
+            document.getElementById('calculatorSection').classList.toggle('hidden', mode !== 'calculator');
+            document.getElementById('converterSection').classList.toggle('hidden', mode !== 'converter');
+            document.getElementById('recipesSection').classList.toggle('hidden', mode !== 'recipes');
+            
+            if (mode === 'recipes') {
+                displaySavedRecipes();
+            }
+        }
+
+        // Recipe calculation
+        function calculateRecipe() {
+            const totalVolume = parseFloat(document.getElementById('totalVolume').value) || 0;
+            const targetNicotine = parseFloat(document.getElementById('targetNicotine').value) || 0;
+            const nicotineStrength = parseFloat(document.getElementById('nicotineStrength').value) || 0;
+            const vgPgRatio = document.getElementById('vgPgRatio').value;
+            const flavorPercentage = parseFloat(document.getElementById('flavorPercentage').value) || 0;
+            
+            if (totalVolume <= 0) {
+                alert('⚠️ Please enter a valid total volume');
+                return;
+            }
+            
+            if (flavorPercentage > 30) {
+                alert('⚠️ Flavor percentage above 30% may result in harsh e-liquid');
+            }
+            
+            // Calculate amounts with precision
+            const nicotineAmount = nicotineStrength > 0 ? (targetNicotine * totalVolume) / nicotineStrength : 0;
+            const flavorAmount = (flavorPercentage / 100) * totalVolume;
+            const baseAmount = totalVolume - nicotineAmount - flavorAmount;
+            
+            if (baseAmount < 0) {
+                alert('⚠️ Invalid recipe: Nicotine and flavor amounts exceed total volume');
+                return;
+            }
+            
+            // Calculate VG/PG split
+            const [vgRatio, pgRatio] = vgPgRatio.split('/').map(r => parseInt(r) / 100);
+            const vgAmount = baseAmount * vgRatio;
+            const pgAmount = baseAmount * pgRatio;
+            
+            // Display results
+            displayResults({
+                totalVolume,
+                nicotineAmount,
+                flavorAmount,
+                vgAmount,
+                pgAmount,
+                targetNicotine,
+                flavorPercentage,
+                vgPgRatio
+            });
+            
+            // Show save button
+            document.getElementById('saveBtn').style.display = 'inline-block';
+        }
+
+        function displayResults(recipe) {
+            const resultsGrid = document.getElementById('resultsGrid');
+            const recipeList = document.getElementById('recipeList');
+            const recipeName = document.getElementById('recipeName').value || 'Professional E-Liquid Recipe';
+            
+            // Update recipe display name
+            document.getElementById('recipeDisplayName').textContent = recipeName;
+            
+            // Results summary
+            resultsGrid.innerHTML = `
+                <div class="result-card">
+                    <span class="result-value">${recipe.totalVolume.toFixed(1)}</span>
+                    <span class="result-label">Total Volume (ml)</span>
+                </div>
+                <div class="result-card">
+                    <span class="result-value">${recipe.targetNicotine.toFixed(1)}</span>
+                    <span class="result-label">Nicotine (mg/ml)</span>
+                </div>
+                <div class="result-card">
+                    <span class="result-value">${recipe.flavorPercentage.toFixed(1)}%</span>
+                    <span class="result-label">Flavor Concentrate</span>
+                </div>
+                <div class="result-card">
+                    <span class="result-value">${recipe.vgPgRatio}</span>
+                    <span class="result-label">VG/PG Ratio</span>
+                </div>
+            `;
+            
+            // Recipe breakdown with professional formatting
+            recipeList.innerHTML = `
+                ${recipe.nicotineAmount > 0 ? `
+                    <div class="recipe-item">
+                        <span class="ingredient-name">💊 Nicotine Base (${document.getElementById('nicotineStrength').value}mg/ml)</span>
+                        <span class="ingredient-amount">${recipe.nicotineAmount.toFixed(3)} ml</span>
+                    </div>
+                ` : ''}
+                <div class="recipe-item">
+                    <span class="ingredient-name">🍓 Flavor Concentrate (Total)</span>
+                    <span class="ingredient-amount">${recipe.flavorAmount.toFixed(3)} ml</span>
+                </div>
+                <div class="recipe-item">
+                    <span class="ingredient-name">🌫️ VG (Vegetable Glycerin)</span>
+                    <span class="ingredient-amount">${recipe.vgAmount.toFixed(3)} ml</span>
+                </div>
+                <div class="recipe-item">
+                    <span class="ingredient-name">💧 PG (Propylene Glycol)</span>
+                    <span class="ingredient-amount">${recipe.pgAmount.toFixed(3)} ml</span>
+                </div>
+            `;
+            
+            document.getElementById('resultsSection').style.display = 'block';
+        }
+
+        // Unit conversion with enhanced precision
+        function convertUnits() {
+            const value = parseFloat(document.getElementById('convertValue').value) || 0;
+            const fromUnit = document.getElementById('fromUnit').value;
+            const toUnit = document.getElementById('toUnit').value;
+            
+            if (value <= 0) {
+                alert('⚠️ Please enter a valid value to convert');
+                return;
+            }
+            
+            // Enhanced conversion table with higher precision
+            const conversionTable = {
+                'ml': { 'ml': 1, 'g': 1, 'oz': 0.033814, 'drops': 20, 'tsp': 0.202884, 'tbsp': 0.067628 },
+                'g': { 'ml': 1, 'g': 1, 'oz': 0.033814, 'drops': 20, 'tsp': 0.202884, 'tbsp': 0.067628 },
+                'oz': { 'ml': 29.5735, 'g': 29.5735, 'oz': 1, 'drops': 591.47, 'tsp': 6, 'tbsp': 2 },
+                'drops': { 'ml': 0.05, 'g': 0.05, 'oz': 0.00169, 'drops': 1, 'tsp': 0.01014, 'tbsp': 0.00338 },
+                'tsp': { 'ml': 4.92892, 'g': 4.92892, 'oz': 0.166667, 'drops': 98.5784, 'tsp': 1, 'tbsp': 0.333333 },
+                'tbsp': { 'ml': 14.7868, 'g': 14.7868, 'oz': 0.5, 'drops': 295.735, 'tsp': 3, 'tbsp': 1 }
+            };
+            
+            const result = value * conversionTable[fromUnit][toUnit];
+            
+            document.getElementById('conversionResult').textContent = result.toFixed(4);
+            document.getElementById('conversionUnit').textContent = toUnit.toUpperCase();
+            document.getElementById('converterResults').style.display = 'block';
+        }
+
+        function clearConverter() {
+            document.getElementById('convertValue').value = '';
+            document.getElementById('conversionResult').textContent = '0.000';
+            document.getElementById('conversionUnit').textContent = 'Result';
+            document.getElementById('converterResults').style.display = 'none';
+        }
+
+        // Enhanced recipe management
+        function saveRecipe() {
+            const recipeName = document.getElementById('recipeName').value || `Professional Recipe ${Date.now()}`;
+            const totalVolume = parseFloat(document.getElementById('totalVolume').value);
+            const targetNicotine = parseFloat(document.getElementById('targetNicotine').value);
+            const nicotineStrength = parseFloat(document.getElementById('nicotineStrength').value);
+            const vgPgRatio = document.getElementById('vgPgRatio').value;
+            const flavorPercentage = parseFloat(document.getElementById('flavorPercentage').value);
+            
+            const recipe = {
+                id: Date.now(),
+                name: recipeName,
+                totalVolume,
+                targetNicotine,
+                nicotineStrength,
+                vgPgRatio,
+                flavorPercentage,
+                createdAt: new Date().toISOString(),
+                version: '1.0'
+            };
+            
+            savedRecipes.push(recipe);
+            localStorage.setItem('eliquid-recipes-pro', JSON.stringify(savedRecipes));
+            
+            // Enhanced feedback
+            showSuccessMessage('✅ Recipe saved successfully to your professional library!');
+            document.getElementById('saveBtn').style.display = 'none';
+        }
+
+        function displaySavedRecipes() {
+            const container = document.getElementById('savedRecipes');
+            
+            if (savedRecipes.length === 0) {
+                container.innerHTML = `
+                    <p style="text-align: center; color: var(--text-secondary); font-style: italic; font-size: 1.1rem; padding: 40px;">
+                        No saved recipes yet. Create and save a recipe in the Calculator tab to build your professional library!
+                    </p>
+                `;
+                return;
+            }
+            
+            container.innerHTML = savedRecipes.map(recipe => `
+                <div class="recipe-card">
+                    <div class="recipe-name">${recipe.name}</div>
+                    <div class="recipe-info">
+                        <strong>Volume:</strong> ${recipe.totalVolume}ml • 
+                        <strong>Nicotine:</strong> ${recipe.targetNicotine}mg/ml • 
+                        <strong>Ratio:</strong> ${recipe.vgPgRatio} VG/PG • 
+                        <strong>Flavor:</strong> ${recipe.flavorPercentage}%
+                        <br><strong>Created:</strong> ${new Date(recipe.createdAt).toLocaleDateString()} • 
+                        <strong>Version:</strong> ${recipe.version || '1.0'}
+                    </div>
+                    <div class="recipe-actions">
+                        <button class="btn btn-small" onclick="loadRecipe(${recipe.id})">🔄 Load Recipe</button>
+                        <button class="btn btn-small btn-secondary" onclick="duplicateRecipe(${recipe.id})">📋 Duplicate</button>
+                        <button class="btn btn-small btn-tertiary" onclick="exportRecipe(${recipe.id})">📤 Export</button>
+                        <button class="btn btn-small btn-danger" onclick="deleteRecipe(${recipe.id})">🗑️ Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadRecipe(id) {
+            const recipe = savedRecipes.find(r => r.id === id);
+            if (!recipe) return;
+            
+            document.getElementById('totalVolume').value = recipe.totalVolume;
+            document.getElementById('targetNicotine').value = recipe.targetNicotine;
+            document.getElementById('nicotineStrength').value = recipe.nicotineStrength;
+            document.getElementById('vgPgRatio').value = recipe.vgPgRatio;
+            document.getElementById('flavorPercentage').value = recipe.flavorPercentage;
+            document.getElementById('recipeName').value = recipe.name;
+            
+            switchMode('calculator');
+            calculateRecipe();
+            showSuccessMessage('✅ Recipe loaded successfully!');
+        }
+
+        function duplicateRecipe(id) {
+            const recipe = savedRecipes.find(r => r.id === id);
+            if (!recipe) return;
+            
+            const duplicate = {
+                ...recipe,
+                id: Date.now(),
+                name: `${recipe.name} (Copy)`,
+                createdAt: new Date().toISOString()
+            };
+            
+            savedRecipes.push(duplicate);
+            localStorage.setItem('eliquid-recipes-pro', JSON.stringify(savedRecipes));
+            displaySavedRecipes();
+            showSuccessMessage('✅ Recipe duplicated successfully!');
+        }
+
+        function exportRecipe(id) {
+            const recipe = savedRecipes.find(r => r.id === id);
+            if (!recipe) return;
+            
+            const recipeText = formatRecipeForExport(recipe);
+            copyToClipboard(recipeText);
+            showSuccessMessage('✅ Recipe copied to clipboard!');
+        }
+
+        function exportAllRecipes() {
+            if (savedRecipes.length === 0) {
+                alert('⚠️ No recipes to export');
+                return;
+            }
+            
+            const allRecipesText = savedRecipes.map(recipe => formatRecipeForExport(recipe)).join('\n\n' + '='.repeat(80) + '\n\n');
+            copyToClipboard(`PROFESSIONAL E-LIQUID RECIPE LIBRARY\n${'='.repeat(80)}\n\n${allRecipesText}\n\nExported by E-Liquid Calculator Pro - NetIRC`);
+            showSuccessMessage('✅ All recipes copied to clipboard!');
+        }
+
+        function deleteRecipe(id) {
+            if (confirm('⚠️ Are you sure you want to delete this recipe? This action cannot be undone.')) {
+                savedRecipes = savedRecipes.filter(r => r.id !== id);
+                localStorage.setItem('eliquid-recipes-pro', JSON.stringify(savedRecipes));
+                displaySavedRecipes();
+                showSuccessMessage('✅ Recipe deleted successfully!');
+            }
+        }
+
+        function clearAllRecipes() {
+            if (confirm('⚠️ Are you sure you want to delete ALL recipes? This action cannot be undone and will clear your entire professional library.')) {
+                savedRecipes = [];
+                localStorage.setItem('eliquid-recipes-pro', JSON.stringify(savedRecipes));
+                displaySavedRecipes();
+                showSuccessMessage('✅ All recipes cleared!');
+            }
+        }
+
+        // Utility functions
+        function formatRecipeForExport(recipe) {
+            // Calculate recipe details
+            const nicotineAmount = recipe.nicotineStrength > 0 ? (recipe.targetNicotine * recipe.totalVolume) / recipe.nicotineStrength : 0;
+            const flavorAmount = (recipe.flavorPercentage / 100) * recipe.totalVolume;
+            const baseAmount = recipe.totalVolume - nicotineAmount - flavorAmount;
+            const [vgRatio, pgRatio] = recipe.vgPgRatio.split('/').map(r => parseInt(r) / 100);
+            const vgAmount = baseAmount * vgRatio;
+            const pgAmount = baseAmount * pgRatio;
+            
+            return `${recipe.name}
+${'='.repeat(recipe.name.length)}
+
+Recipe Details:
+• Total Volume: ${recipe.totalVolume} ml
+• Target Nicotine: ${recipe.targetNicotine} mg/ml
+• VG/PG Ratio: ${recipe.vgPgRatio}
+• Flavor Percentage: ${recipe.flavorPercentage}%
+• Created: ${new Date(recipe.createdAt).toLocaleDateString()}
+
+Ingredients:
+${nicotineAmount > 0 ? `• Nicotine Base (${recipe.nicotineStrength}mg/ml): ${nicotineAmount.toFixed(3)} ml\n` : ''}• Flavor Concentrate: ${flavorAmount.toFixed(3)} ml
+• VG (Vegetable Glycerin): ${vgAmount.toFixed(3)} ml  
+• PG (Propylene Glycol): ${pgAmount.toFixed(3)} ml
+
+Professional Mixing Instructions:
+1. Wear protective equipment (gloves, safety glasses)
+2. Work in well-ventilated area
+3. Add ingredients in order: Nicotine → Flavors → VG → PG
+4. Mix thoroughly with glass stirring rod
+5. Steep for 1-2 weeks in cool, dark place
+6. Label with recipe name, date, and nicotine strength`;
+        }
+
+        function copyRecipe() {
+            const recipeName = document.getElementById('recipeDisplayName').textContent;
+            const recipeItems = Array.from(document.querySelectorAll('.recipe-item')).map(item => {
+                const name = item.querySelector('.ingredient-name').textContent;
+                const amount = item.querySelector('.ingredient-amount').textContent;
+                return `${name}: ${amount}`;
+            }).join('\n');
+            
+            const recipeText = `${recipeName}\n${'='.repeat(recipeName.length)}\n\nIngredients:\n${recipeItems}\n\nMixed with E-Liquid Calculator Pro by NetIRC\nProfessional Grade Mixing Tool`;
+            
+            copyToClipboard(recipeText);
+            showCopySuccess();
+        }
+
+        function copyToClipboard(text) {
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => {
+                    console.log('Text copied to clipboard');
+                }).catch(() => {
+                    fallbackCopy(text);
+                });
+            } else {
+                fallbackCopy(text);
+            }
+        }
+
+        function fallbackCopy(text) {
+            const temp = document.createElement('textarea');
+            temp.value = text;
+            temp.style.position = 'fixed';
+            temp.style.opacity = '0';
+            temp.style.left = '-999999px';
+            temp.style.top = '-999999px';
+            
+            document.body.appendChild(temp);
+            temp.focus();
+            temp.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                document.body.removeChild(temp);
+                
+                if (successful) {
+                    console.log('Text copied using fallback method');
+                } else {
+                    throw new Error('Copy failed');
+                }
+            } catch (err) {
+                document.body.removeChild(temp);
+                alert('⚠️ Failed to copy. Please select and copy manually.');
+            }
+        }
+
+        function showCopySuccess() {
+            const copyBtn = document.querySelector('.copy-btn');
+            const originalText = copyBtn.innerHTML;
+            copyBtn.innerHTML = '✅ Copied!';
+            copyBtn.classList.add('copied');
+            
+            setTimeout(() => {
+                copyBtn.innerHTML = originalText;
+                copyBtn.classList.remove('copied');
+            }, 2000);
+        }
+
+        function showSuccessMessage(message) {
+            // Create and show temporary success message
+            const successDiv = document.createElement('div');
+            successDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, var(--accent-green) 0%, #059669 100%);
+                color: white;
+                padding: 16px 24px;
+                border-radius: 12px;
+                font-weight: 600;
+                font-size: 1rem;
+                box-shadow: var(--shadow-lg);
+                z-index: 10000;
+                animation: slideInRight 0.3s ease;
+            `;
+            successDiv.textContent = message;
+            
+            document.body.appendChild(successDiv);
+            
+            setTimeout(() => {
+                successDiv.style.animation = 'slideOutRight 0.3s ease';
+                setTimeout(() => {
+                    if (document.body.contains(successDiv)) {
+                        document.body.removeChild(successDiv);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // Enhanced PWA functionality
+        function initializePWA() {
+            const manifest = {
+                name: "E-Liquid Calculator Pro",
+                short_name: "E-Liquid Pro",
+                description: "Enterprise-grade e-liquid mixing calculator for professional vaping and DIY enthusiasts",
+                start_url: "/",
+                display: "standalone",
+                background_color: "#1e293b",
+                theme_color: "#1e293b",
+                orientation: "portrait-primary",
+                categories: ["utilities", "productivity", "lifestyle", "health"],
+                icons: [
+                    {
+                        src: "data:image/svg+xml;base64," + btoa(`
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="#1e293b">
+                                <rect x="60" y="80" width="392" height="350" rx="40" fill="#f8fafc" stroke="#1e293b" stroke-width="16"/>
+                                <circle cx="256" cy="160" r="50" fill="#1e293b"/>
+                                <rect x="180" y="240" width="152" height="16" rx="8" fill="#1e293b"/>
+                                <rect x="150" y="280" width="212" height="16" rx="8" fill="#10b981"/>
+                                <rect x="120" y="320" width="272" height="16" rx="8" fill="#3b82f6"/>
+                                <rect x="180" y="360" width="152" height="16" rx="8" fill="#f59e0b"/>
+                                <circle cx="120" cy="40" r="16" fill="#10b981"/>
+                                <circle cx="392" cy="40" r="16" fill="#f59e0b"/>
+                                <circle cx="256" cy="20" r="12" fill="#ef4444"/>
+                                <text x="256" y="480" text-anchor="middle" fill="#1e293b" font-size="24" font-weight="bold">PRO</text>
+                            </svg>
+                        `),
+                        sizes: "512x512",
+                        type: "image/svg+xml",
+                        purpose: "any maskable"
+                    }
+                ]
+            };
+
+            const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+            const manifestURL = URL.createObjectURL(manifestBlob);
+            document.getElementById('manifest-placeholder').href = manifestURL;
+
+            const faviconSVG = `
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="#1e293b">
+                    <rect x="4" y="6" width="24" height="20" rx="3" fill="#f8fafc" stroke="#1e293b" stroke-width="1.5"/>
+                    <circle cx="16" cy="12" r="3" fill="#1e293b"/>
+                    <rect x="10" y="17" width="12" height="1.5" rx="0.5" fill="#1e293b"/>
+                    <rect x="8" y="20" width="16" height="1.5" rx="0.5" fill="#10b981"/>
+                    <rect x="12" y="23" width="8" height="1.5" rx="0.5" fill="#3b82f6"/>
+                </svg>
+            `;
+            const faviconURL = "data:image/svg+xml;base64," + btoa(faviconSVG);
+            document.getElementById('favicon-placeholder').href = faviconURL;
+
+            if ('serviceWorker' in navigator) {
+                registerServiceWorker();
+            }
+
+            handleInstallPrompt();
+            
+            if (window.matchMedia('(display-mode: standalone)').matches) {
+                updatePWAStatus('✓ Running as professional installed app');
+            }
+        }
+
+        function registerServiceWorker() {
+            const swCode = `
+                const CACHE_NAME = 'eliquid-calculator-pro-v2';
+                const urlsToCache = [
+                    '/',
+                    '/index.html'
+                ];
+                
+                self.addEventListener('install', (event) => {
+                    event.waitUntil(
+                        caches.open(CACHE_NAME).then((cache) => {
+                            return cache.addAll(urlsToCache);
+                        })
+                    );
+                });
+                
+                self.addEventListener('fetch', (event) => {
+                    event.respondWith(
+                        caches.match(event.request).then((response) => {
+                            if (response) {
+                                return response;
+                            }
+                            return fetch(event.request);
+                        })
+                    );
+                });
+                
+                self.addEventListener('activate', (event) => {
+                    event.waitUntil(
+                        caches.keys().then((cacheNames) => {
+                            return Promise.all(
+                                cacheNames.map((cacheName) => {
+                                    if (cacheName !== CACHE_NAME) {
+                                        return caches.delete(cacheName);
+                                    }
+                                })
+                            );
+                        })
+                    );
+                });
+            `;
+
+            const swBlob = new Blob([swCode], { type: 'application/javascript' });
+            const swURL = URL.createObjectURL(swBlob);
+
+            navigator.serviceWorker.register(swURL)
+                .then((registration) => {
+                    console.log('Service Worker registered successfully');
+                })
+                .catch((error) => {
+                    console.log('Service Worker registration failed:', error);
+                });
+        }
+
+        let deferredPrompt;
+
+        function handleInstallPrompt() {
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                showInstallButton();
+            });
+
+            window.addEventListener('appinstalled', () => {
+                hideInstallButton();
+                updatePWAStatus('✓ Professional App Installed - Full offline capability');
+                showSuccessMessage('🎉 E-Liquid Calculator Pro installed successfully!');
+            });
+        }
+
+        function showInstallButton() {
+            if (!document.getElementById('install-button')) {
+                const installBtn = document.createElement('button');
+                installBtn.id = 'install-button';
+                installBtn.innerHTML = '📱 Install Professional App';
+                installBtn.className = 'btn btn-secondary';
+                installBtn.onclick = installPWA;
+                document.body.appendChild(installBtn);
+            }
+        }
+
+        function hideInstallButton() {
+            const installBtn = document.getElementById('install-button');
+            if (installBtn) {
+                installBtn.remove();
+            }
+        }
+
+        function updatePWAStatus(message) {
+            const pwaStatus = document.getElementById('pwaStatus');
+            if (pwaStatus) {
+                pwaStatus.textContent = message;
+            }
+        }
+
+        function installPWA() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('User accepted the install prompt');
+                    }
+                    deferredPrompt = null;
+                    hideInstallButton();
+                });
+            }
+        }
+
+        // Offline detection
+        function setupOfflineDetection() {
+            const offlineIndicator = document.getElementById('offlineIndicator');
+            
+            window.addEventListener('online', () => {
+                offlineIndicator.style.display = 'none';
+                showSuccessMessage('🌐 Back online - Full functionality restored');
+            });
+            
+            window.addEventListener('offline', () => {
+                offlineIndicator.style.display = 'block';
+            });
+            
+            if (!navigator.onLine) {
+                offlineIndicator.style.display = 'block';
+            }
+        }
+
+        // Add CSS animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideInRight {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOutRight {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Initialize app
+        window.addEventListener('load', () => {
+            switchMode('calculator');
+            initializePWA();
+            setupOfflineDetection();
+        });
+    </script>
+</body>
+</html>
