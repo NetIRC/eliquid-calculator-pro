@@ -675,6 +675,31 @@
             100% { transform: scale(1); }
         }
 
+        .success-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, var(--accent-green) 0%, #059669 100%);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            box-shadow: var(--shadow-lg);
+            z-index: 10000;
+            animation: slideInRight 0.3s ease;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes slideOutRight {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+
         /* Responsive Design */
         @media (max-width: 1024px) {
             .content {
@@ -692,16 +717,20 @@
         }
 
         @media (max-width: 768px) {
+            html, body {
+                margin: 0;
+                padding: 0;
+            }
+            
             .container {
-			    max-width: none;
-				width: 100%;
-				margin: 0;
-				border-left: none;
-				border-right: none;
-				border-radius: 0;
-			}
-						
-			.header {
+                max-width: none;
+                width: 100vw;
+                margin: 0;
+                border: none;
+                min-height: 100vh;
+            }
+            
+            .header {
                 padding: 40px 24px;
             }
             
@@ -747,6 +776,22 @@
                 right: 20px;
                 padding: 14px 24px;
             }
+
+            .success-message {
+                top: 20px;
+                left: 50%;
+                right: auto;
+                transform: translateX(-50%);
+                width: calc(100% - 40px);
+                max-width: 320px;
+                text-align: center;
+                animation: slideInDown 0.3s ease;
+            }
+
+            @keyframes slideInDown {
+                from { transform: translateX(-50%) translateY(-100%); opacity: 0; }
+                to { transform: translateX(-50%) translateY(0); opacity: 1; }
+            }
         }
 
         @media (max-width: 480px) {
@@ -779,6 +824,11 @@
                 width: 40px;
                 height: 40px;
                 font-size: 1.2rem;
+            }
+
+            .success-message {
+                width: calc(100% - 20px);
+                max-width: 280px;
             }
         }
     </style>
@@ -1418,17 +1468,17 @@
 ${'='.repeat(recipe.name.length)}
 
 Recipe Details:
-• Total Volume: ${recipe.totalVolume} ml
-• Target Nicotine: ${recipe.targetNicotine} mg/ml
-• VG/PG Ratio: ${recipe.vgPgRatio}
-• Flavor Percentage: ${recipe.flavorPercentage}%
-• Nicotine Base: ${recipe.nicotineStrength} mg/ml ${recipe.isCustomNicotine ? '(Custom)' : ''}
-• Created: ${new Date(recipe.createdAt).toLocaleDateString()}
+- Total Volume: ${recipe.totalVolume} ml
+- Target Nicotine: ${recipe.targetNicotine} mg/ml
+- VG/PG Ratio: ${recipe.vgPgRatio}
+- Flavor Percentage: ${recipe.flavorPercentage}%
+- Nicotine Base: ${recipe.nicotineStrength} mg/ml ${recipe.isCustomNicotine ? '(Custom)' : ''}
+- Created: ${new Date(recipe.createdAt).toLocaleDateString()}
 
 Ingredients:
 ${nicotineAmount > 0 ? `• Nicotine Base (${recipe.nicotineStrength}mg/ml): ${formatNumber(nicotineAmount)} ml\n` : ''}• Flavor Concentrate: ${formatNumber(flavorAmount)} ml
-• VG (Vegetable Glycerin): ${formatNumber(vgAmount)} ml  
-• PG (Propylene Glycol): ${formatNumber(pgAmount)} ml
+- VG (Vegetable Glycerin): ${formatNumber(vgAmount)} ml  
+- PG (Propylene Glycol): ${formatNumber(pgAmount)} ml
 
 Professional Mixing Instructions:
 1. Wear protective equipment (gloves, safety glasses)
@@ -1506,20 +1556,7 @@ Professional Mixing Instructions:
 
         function showSuccessMessage(message) {
             const successDiv = document.createElement('div');
-            successDiv.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: linear-gradient(135deg, var(--accent-green) 0%, #059669 100%);
-                color: white;
-                padding: 16px 24px;
-                border-radius: 12px;
-                font-weight: 600;
-                font-size: 1rem;
-                box-shadow: var(--shadow-lg);
-                z-index: 10000;
-                animation: slideInRight 0.3s ease;
-            `;
+            successDiv.className = 'success-message';
             successDiv.textContent = message;
             
             document.body.appendChild(successDiv);
@@ -1719,19 +1756,6 @@ Professional Mixing Instructions:
                 offlineIndicator.style.display = 'block';
             }
         }
-
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes slideInRight {
-                from { transform: translateX(100%); opacity: 0; }
-                to { transform: translateX(0); opacity: 1; }
-            }
-            @keyframes slideOutRight {
-                from { transform: translateX(0); opacity: 1; }
-                to { transform: translateX(100%); opacity: 0; }
-            }
-        `;
-        document.head.appendChild(style);
 
         window.addEventListener('load', () => {
             switchMode('calculator');
