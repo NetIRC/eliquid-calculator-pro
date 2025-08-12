@@ -384,6 +384,19 @@
             margin-bottom: 12px;
             display: block;
             line-height: 1;
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+        }
+
+        .result-value .number-whole {
+            font-weight: 900;
+            color: var(--primary-dark);
+        }
+
+        .result-value .number-decimals {
+            font-weight: 700;
+            color: var(--text-secondary);
+            font-size: 0.85em;
+            opacity: 0.8;
         }
 
         .result-label {
@@ -486,6 +499,21 @@
             color: var(--primary-dark);
             font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
             font-size: 1.1rem;
+            display: flex;
+            align-items: baseline;
+            gap: 2px;
+        }
+
+        .number-whole {
+            font-weight: 800;
+            color: var(--primary-dark);
+        }
+
+        .number-decimals {
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.9em;
+            opacity: 0.8;
         }
 
         .saved-recipes {
@@ -1001,7 +1029,7 @@
                 <div class="footer-description">Professional E-Liquid Mixing Calculator</div>
                 Developed by <span class="footer-brand">NetIRC</span>
                 <div class="pwa-status" id="pwaStatus">
-                    ✓ PWA Ready - Install for offline professional use
+                    ✓ PWA Ready - Install for offline use
                 </div>
             </div>
         </div>
@@ -1011,36 +1039,54 @@
         let currentMode = 'calculator';
         let savedRecipes = JSON.parse(localStorage.getItem('eliquid-recipes-pro') || '[]');
 
-        // Utility function for better number formatting
         function formatNumber(num) {
-            // Round to avoid floating point precision issues
             const rounded = Math.round(num * 1000) / 1000;
             
-            // For large numbers (>=1000), use thousand separators
             if (rounded >= 1000) {
                 return rounded.toLocaleString('en-US', {
                     minimumFractionDigits: 0,
-                    maximumFractionDigits: 3
+                    maximumFractionDigits: 2
                 });
             }
             
-            // For smaller numbers, show only necessary decimals
-            if (rounded % 1 === 0) {
-                // Whole number, no decimals needed
-                return rounded.toString();
-            } else if (rounded * 10 % 1 === 0) {
-                // One decimal place
-                return rounded.toFixed(1);
-            } else if (rounded * 100 % 1 === 0) {
-                // Two decimal places  
-                return rounded.toFixed(2);
+            if (rounded >= 100) {
+                if (rounded % 1 === 0) {
+                    return rounded.toString();
+                } else {
+                    return rounded.toFixed(1);
+                }
+            } else if (rounded >= 10) {
+                if (rounded % 1 === 0) {
+                    return rounded.toString();
+                } else if (rounded * 10 % 1 === 0) {
+                    return rounded.toFixed(1);
+                } else {
+                    return rounded.toFixed(2);
+                }
             } else {
-                // Three decimal places
-                return rounded.toFixed(3);
+                if (rounded % 1 === 0) {
+                    return rounded.toString();
+                } else if (rounded * 10 % 1 === 0) {
+                    return rounded.toFixed(1);
+                } else if (rounded * 100 % 1 === 0) {
+                    return rounded.toFixed(2);
+                } else {
+                    return rounded.toFixed(3);
+                }
             }
         }
 
-        // Toggle custom nicotine strength input
+        function formatNumberWithStyle(num) {
+            const formatted = formatNumber(num);
+            const parts = formatted.split('.');
+            
+            if (parts.length === 1) {
+                return `<span class="number-whole">${parts[0]}</span>`;
+            } else {
+                return `<span class="number-whole">${parts[0]}</span><span class="number-decimals">.${parts[1]}</span>`;
+            }
+        }
+
         function toggleCustomNicotine() {
             const select = document.getElementById('nicotineStrength');
             const customInput = document.getElementById('customNicotineStrength');
@@ -1054,7 +1100,6 @@
             }
         }
 
-        // Get current nicotine strength value
         function getNicotineStrength() {
             const select = document.getElementById('nicotineStrength');
             if (select.value === 'custom') {
@@ -1063,16 +1108,13 @@
             return parseFloat(select.value) || 0;
         }
 
-        // Mode switching
         function switchMode(mode) {
             currentMode = mode;
             
-            // Update button states
             document.getElementById('calculatorMode').classList.toggle('active', mode === 'calculator');
             document.getElementById('converterMode').classList.toggle('active', mode === 'converter');
             document.getElementById('recipesMode').classList.toggle('active', mode === 'recipes');
             
-            // Show/hide sections
             document.getElementById('calculatorSection').classList.toggle('hidden', mode !== 'calculator');
             document.getElementById('converterSection').classList.toggle('hidden', mode !== 'converter');
             document.getElementById('recipesSection').classList.toggle('hidden', mode !== 'recipes');
@@ -1082,7 +1124,6 @@
             }
         }
 
-        // Recipe calculation
         function calculateRecipe() {
             const totalVolume = parseFloat(document.getElementById('totalVolume').value) || 0;
             const targetNicotine = parseFloat(document.getElementById('targetNicotine').value) || 0;
@@ -1104,7 +1145,6 @@
                 alert('⚠️ Flavor percentage above 30% may result in harsh e-liquid');
             }
             
-            // Calculate amounts with precision
             const nicotineAmount = nicotineStrength > 0 ? (targetNicotine * totalVolume) / nicotineStrength : 0;
             const flavorAmount = (flavorPercentage / 100) * totalVolume;
             const baseAmount = totalVolume - nicotineAmount - flavorAmount;
@@ -1114,12 +1154,10 @@
                 return;
             }
             
-            // Calculate VG/PG split
             const [vgRatio, pgRatio] = vgPgRatio.split('/').map(r => parseInt(r) / 100);
             const vgAmount = baseAmount * vgRatio;
             const pgAmount = baseAmount * pgRatio;
             
-            // Display results
             displayResults({
                 totalVolume,
                 nicotineAmount,
@@ -1132,7 +1170,6 @@
                 nicotineStrength
             });
             
-            // Show save button
             document.getElementById('saveBtn').style.display = 'inline-block';
         }
 
@@ -1141,10 +1178,8 @@
             const recipeList = document.getElementById('recipeList');
             const recipeName = document.getElementById('recipeName').value || 'Professional E-Liquid Recipe';
             
-            // Update recipe display name
             document.getElementById('recipeDisplayName').textContent = recipeName;
             
-            // Results summary
             resultsGrid.innerHTML = `
                 <div class="result-card">
                     <span class="result-value">${recipe.totalVolume.toFixed(1)}</span>
@@ -1164,32 +1199,30 @@
                 </div>
             `;
             
-            // Recipe breakdown with improved number formatting
             recipeList.innerHTML = `
                 ${recipe.nicotineAmount > 0 ? `
                     <div class="recipe-item">
                         <span class="ingredient-name">💊 Nicotine Base (${recipe.nicotineStrength}mg/ml)</span>
-                        <span class="ingredient-amount">${formatNumber(recipe.nicotineAmount)} ml</span>
+                        <span class="ingredient-amount">${formatNumberWithStyle(recipe.nicotineAmount)} <span style="color: var(--text-secondary); font-weight: 500;">ml</span></span>
                     </div>
                 ` : ''}
                 <div class="recipe-item">
                     <span class="ingredient-name">🍓 Flavor Concentrate (Total)</span>
-                    <span class="ingredient-amount">${formatNumber(recipe.flavorAmount)} ml</span>
+                    <span class="ingredient-amount">${formatNumberWithStyle(recipe.flavorAmount)} <span style="color: var(--text-secondary); font-weight: 500;">ml</span></span>
                 </div>
                 <div class="recipe-item">
                     <span class="ingredient-name">🌫️ VG (Vegetable Glycerin)</span>
-                    <span class="ingredient-amount">${formatNumber(recipe.vgAmount)} ml</span>
+                    <span class="ingredient-amount">${formatNumberWithStyle(recipe.vgAmount)} <span style="color: var(--text-secondary); font-weight: 500;">ml</span></span>
                 </div>
                 <div class="recipe-item">
                     <span class="ingredient-name">💧 PG (Propylene Glycol)</span>
-                    <span class="ingredient-amount">${formatNumber(recipe.pgAmount)} ml</span>
+                    <span class="ingredient-amount">${formatNumberWithStyle(recipe.pgAmount)} <span style="color: var(--text-secondary); font-weight: 500;">ml</span></span>
                 </div>
             `;
             
             document.getElementById('resultsSection').style.display = 'block';
         }
 
-        // Unit conversion with enhanced precision
         function convertUnits() {
             const value = parseFloat(document.getElementById('convertValue').value) || 0;
             const fromUnit = document.getElementById('fromUnit').value;
@@ -1200,7 +1233,6 @@
                 return;
             }
             
-            // Enhanced conversion table with higher precision
             const conversionTable = {
                 'ml': { 'ml': 1, 'g': 1, 'oz': 0.033814, 'drops': 20, 'tsp': 0.202884, 'tbsp': 0.067628 },
                 'g': { 'ml': 1, 'g': 1, 'oz': 0.033814, 'drops': 20, 'tsp': 0.202884, 'tbsp': 0.067628 },
@@ -1212,19 +1244,18 @@
             
             const result = value * conversionTable[fromUnit][toUnit];
             
-            document.getElementById('conversionResult').textContent = result.toFixed(4);
+            document.getElementById('conversionResult').innerHTML = formatNumberWithStyle(result);
             document.getElementById('conversionUnit').textContent = toUnit.toUpperCase();
             document.getElementById('converterResults').style.display = 'block';
         }
 
         function clearConverter() {
             document.getElementById('convertValue').value = '';
-            document.getElementById('conversionResult').textContent = '0.000';
+            document.getElementById('conversionResult').innerHTML = '<span class="number-whole">0</span>';
             document.getElementById('conversionUnit').textContent = 'Result';
             document.getElementById('converterResults').style.display = 'none';
         }
 
-        // Enhanced recipe management
         function saveRecipe() {
             const recipeName = document.getElementById('recipeName').value || `Professional Recipe ${Date.now()}`;
             const totalVolume = parseFloat(document.getElementById('totalVolume').value);
@@ -1250,7 +1281,6 @@
             savedRecipes.push(recipe);
             localStorage.setItem('eliquid-recipes-pro', JSON.stringify(savedRecipes));
             
-            // Enhanced feedback
             showSuccessMessage('✅ Recipe saved successfully to your professional library!');
             document.getElementById('saveBtn').style.display = 'none';
         }
@@ -1298,7 +1328,6 @@
             document.getElementById('flavorPercentage').value = recipe.flavorPercentage;
             document.getElementById('recipeName').value = recipe.name;
             
-            // Handle custom nicotine strength
             if (recipe.isCustomNicotine) {
                 document.getElementById('nicotineStrength').value = 'custom';
                 document.getElementById('customNicotineStrength').value = recipe.nicotineStrength;
@@ -1368,9 +1397,7 @@
             }
         }
 
-        // Utility functions
         function formatRecipeForExport(recipe) {
-            // Calculate recipe details
             const nicotineAmount = recipe.nicotineStrength > 0 ? (recipe.targetNicotine * recipe.totalVolume) / recipe.nicotineStrength : 0;
             const flavorAmount = (recipe.flavorPercentage / 100) * recipe.totalVolume;
             const baseAmount = recipe.totalVolume - nicotineAmount - flavorAmount;
@@ -1469,7 +1496,6 @@ Professional Mixing Instructions:
         }
 
         function showSuccessMessage(message) {
-            // Create and show temporary success message
             const successDiv = document.createElement('div');
             successDiv.style.cssText = `
                 position: fixed;
@@ -1499,7 +1525,6 @@ Professional Mixing Instructions:
             }, 3000);
         }
 
-        // Enhanced PWA functionality
         function initializePWA() {
             const manifest = {
                 name: "E-Liquid Calculator Pro",
@@ -1669,7 +1694,6 @@ Professional Mixing Instructions:
             }
         }
 
-        // Offline detection
         function setupOfflineDetection() {
             const offlineIndicator = document.getElementById('offlineIndicator');
             
@@ -1687,7 +1711,6 @@ Professional Mixing Instructions:
             }
         }
 
-        // Add CSS animations
         const style = document.createElement('style');
         style.textContent = `
             @keyframes slideInRight {
@@ -1701,7 +1724,6 @@ Professional Mixing Instructions:
         `;
         document.head.appendChild(style);
 
-        // Initialize app
         window.addEventListener('load', () => {
             switchMode('calculator');
             initializePWA();
